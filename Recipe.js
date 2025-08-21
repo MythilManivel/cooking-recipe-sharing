@@ -131,15 +131,14 @@ const recipeSchema = new mongoose.Schema({
       type: String,
       required: true
     },
-    public_id: String, // For Cloudinary
+    public_id: String, 
     alt: String,
     isPrimary: {
       type: Boolean,
       default: false
     }
   }],
-  
-  // Recipe metadata
+
   cookingTime: {
     type: Number,
     required: [true, 'Cooking time is required'],
@@ -435,5 +434,6 @@ recipeSchema.statics.getFeatured = function(limit = 5) {
   .limit(limit)
   .populate('author', 'name avatar');
 };
+
 
 module.exports = mongoose.model('Recipe', recipeSchema);

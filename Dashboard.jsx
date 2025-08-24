@@ -1,4 +1,4 @@
-// src/pages/Dashboard.jsx
+
 import React from 'react';
 import { Box, Typography, Button, Container, Card, CardContent, Grid } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -140,3 +140,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

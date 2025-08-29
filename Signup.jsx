@@ -1,4 +1,3 @@
-// Signup.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -114,8 +113,7 @@ const Signup = () => {
             elevation={6}
             sx={{
               p: 4,
-              display: 'flex',
-              flexDirection: 'column',
+            
               alignItems: 'center',
               background: 'rgba(0, 0, 0, 0.6)',
               backdropFilter: 'blur(12px)',
@@ -322,5 +320,6 @@ const textFieldStyle = {
   },
   mb: 2
 };
+
 
 export default Signup;

@@ -119,7 +119,7 @@ const Login = () => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 background: 'rgba(255, 255, 255, 0.08)',
-                color: 'white',
+                color: 'black',
                 backdropFilter: 'blur(16px)',
                 borderRadius: 5,
                 border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -280,5 +280,6 @@ const Login = () => {
     </Box>
   );
 };
+
 
 export default Login;

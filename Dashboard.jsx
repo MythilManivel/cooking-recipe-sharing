@@ -12,7 +12,6 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // You can add token clearing or auth logic here if needed
     localStorage.removeItem('token');
     navigate('/login');
   };
@@ -140,4 +139,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
 

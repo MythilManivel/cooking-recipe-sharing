@@ -44,8 +44,6 @@ function ForgotPassword() {
           background: 'rgba(0,0,0,0.65)',
           padding: '2rem',
           borderRadius: '12px',
-          maxWidth: '400px',
-          width: '100%',
           color: '#fff',
           boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
           backdropFilter: 'blur(10px)'
@@ -119,3 +117,4 @@ function ForgotPassword() {
 }
 
 export default ForgotPassword;
+

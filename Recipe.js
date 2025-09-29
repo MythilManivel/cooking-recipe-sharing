@@ -8,9 +8,10 @@ const recipeSchema = new mongoose.Schema(
     steps: [{ type: String }],
     imageUrl: { type: String },
     imagePublicId: { type: String },
-    author: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // optional now
+    author: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );
 
 export default mongoose.model("Recipe", recipeSchema);
+

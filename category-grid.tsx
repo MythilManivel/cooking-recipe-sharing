@@ -21,13 +21,6 @@ export default function CategoryGrid({ onCategoryClick }: CategoryGridProps) {
       category: "lunch"
     },
     {
-      name: "Dinner",
-      icon: UtensilsCrossed,
-      count: 428,
-      gradient: "from-recipe-orange to-red-500",
-      category: "dinner"
-    },
-    {
       name: "Dessert",
       icon: IceCream,
       count: 189,

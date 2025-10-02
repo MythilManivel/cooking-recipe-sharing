@@ -98,9 +98,6 @@ function ForgotPassword() {
           <button
             type="submit"
             style={{
-              width: '100%',
-              padding: '0.75rem',
-              borderRadius: '6px',
               backgroundColor: '#ff9800',
               border: 'none',
               color: '#fff',
@@ -117,4 +114,5 @@ function ForgotPassword() {
 }
 
 export default ForgotPassword;
+
 

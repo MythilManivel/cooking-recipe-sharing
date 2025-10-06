@@ -15,7 +15,6 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/Dashboard" element={<Dashboard />} />
-          <Route path="*" element={<div>404 Not Found</div>} />
         </Routes>
       </Router>
     </AuthProvider>

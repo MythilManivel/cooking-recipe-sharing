@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-
-// Initial state
 const initialState = {
   user: null,
   token: localStorage.getItem('token'),
@@ -315,5 +313,6 @@ export const useAuth = () => {
   
   return context;
 };
+
 
 export default AuthContext;

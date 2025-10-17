@@ -103,8 +103,6 @@ export const AuthProvider = ({ children }) => {
       axios.interceptors.response.eject(responseInterceptor);
     };
   }, [state.token, state.isAuthenticated]);
-
-  // Load user on app start
   useEffect(() => {
   if (state.token) {
     loadUser();
@@ -312,5 +310,6 @@ export const useAuth = () => {
 
 
 export default AuthContext;
+
 
 

@@ -16,8 +16,6 @@ const AUTH_ACTIONS = {
   SET_ERROR: 'SET_ERROR',
   UPDATE_USER: 'UPDATE_USER'
 };
-
-// Reducer
 const authReducer = (state, action) => {
   switch (action.type) {
     case AUTH_ACTIONS.SET_LOADING:
@@ -314,4 +312,5 @@ export const useAuth = () => {
 
 
 export default AuthContext;
+
 

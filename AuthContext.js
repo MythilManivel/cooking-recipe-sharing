@@ -8,8 +8,6 @@ const initialState = {
   loading: true,
   error: null
 };
-
-// Action types
 const AUTH_ACTIONS = {
   SET_LOADING: 'SET_LOADING',
   LOGIN_SUCCESS: 'LOGIN_SUCCESS',
@@ -316,3 +314,4 @@ export const useAuth = () => {
 
 
 export default AuthContext;
+

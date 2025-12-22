@@ -69,7 +69,7 @@ const Dashboard = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    p: 3,
+                    p: 4,
                     backgroundColor: '#fff3e0',
                     borderRadius: 3,
                     cursor: 'pointer',
@@ -139,5 +139,6 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
 
 

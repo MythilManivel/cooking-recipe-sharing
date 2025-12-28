@@ -1,13 +1,28 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  useCallback
+} from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+
+/* -------------------- Axios Instance -------------------- */
+const api = axios.create({
+  baseURL: '/api'
+});
+
+/* -------------------- Initial State -------------------- */
 const initialState = {
   user: null,
   token: localStorage.getItem('token'),
-  isAuthenticated: false,
+  isAuthenticated: !!localStorage.getItem('token'),
   loading: true,
   error: null
 };
+
+/* -------------------- Action Types -------------------- */
 const AUTH_ACTIONS = {
   SET_LOADING: 'SET_LOADING',
   LOGIN_SUCCESS: 'LOGIN_SUCCESS',
@@ -16,13 +31,12 @@ const AUTH_ACTIONS = {
   SET_ERROR: 'SET_ERROR',
   UPDATE_USER: 'UPDATE_USER'
 };
+
+/* -------------------- Reducer -------------------- */
 const authReducer = (state, action) => {
   switch (action.type) {
     case AUTH_ACTIONS.SET_LOADING:
-      return {
-        ...state,
-        loading: action.payload
-      };
+      return { ...state, loading: action.payload };
 
     case AUTH_ACTIONS.LOGIN_SUCCESS:
       return {
@@ -36,7 +50,6 @@ const authReducer = (state, action) => {
 
     case AUTH_ACTIONS.LOGOUT:
       return {
-        ...state,
         user: null,
         token: null,
         isAuthenticated: false,
@@ -45,49 +58,43 @@ const authReducer = (state, action) => {
       };
 
     case AUTH_ACTIONS.SET_ERROR:
-      return {
-        ...state,
-        error: action.payload,
-        loading: false
-      };
+      return { ...state, error: action.payload, loading: false };
 
     case AUTH_ACTIONS.CLEAR_ERROR:
-      return {
-        ...state,
-        error: null
-      };
+      return { ...state, error: null };
 
     case AUTH_ACTIONS.UPDATE_USER:
-      return {
-        ...state,
-        user: { ...state.user, ...action.payload }
-      };
+      return { ...state, user: { ...state.user, ...action.payload } };
 
     default:
       return state;
   }
 };
 
-// Create context
+/* -------------------- Context -------------------- */
 const AuthContext = createContext();
 
-// Auth provider component
+/* -------------------- Provider -------------------- */
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Axios interceptor for adding auth header
-  useEffect(() => {
-    const requestInterceptor = axios.interceptors.request.use(
-      (config) => {
-        if (state.token) {
-          config.headers.Authorization = `Bearer ${state.token}`;
-        }
-        return config;
-      },
-      (error) => Promise.reject(error)
-    );
+  /* -------------------- Logout -------------------- */
+  const logout = useCallback(() => {
+    localStorage.removeItem('token');
+    dispatch({ type: AUTH_ACTIONS.LOGOUT });
+    toast.success('Logged out successfully');
+  }, []);
 
-    const responseInterceptor = axios.interceptors.response.use(
+  /* -------------------- Interceptors -------------------- */
+  useEffect(() => {
+    const reqInterceptor = api.interceptors.request.use((config) => {
+      if (state.token) {
+        config.headers.Authorization = `Bearer ${state.token}`;
+      }
+      return config;
+    });
+
+    const resInterceptor = api.interceptors.response.use(
       (response) => response,
       (error) => {
         if (error.response?.status === 401 && state.isAuthenticated) {
@@ -99,217 +106,88 @@ export const AuthProvider = ({ children }) => {
     );
 
     return () => {
-      axios.interceptors.request.eject(requestInterceptor);
-      axios.interceptors.response.eject(responseInterceptor);
+      api.interceptors.request.eject(reqInterceptor);
+      api.interceptors.response.eject(resInterceptor);
     };
-  }, [state.token, state.isAuthenticated]);
-  useEffect(() => {
-  if (state.token) {
-    loadUser();
-  } else {
-    dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
-  }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-}, [state.token]);
+  }, [state.token, state.isAuthenticated, logout]);
 
-
-  // Load user data
-  const loadUser = async () => {
+  /* -------------------- Load User -------------------- */
+  const loadUser = useCallback(async () => {
     try {
-      const response = await axios.get('/api/auth/me');
-      
+      const { data } = await api.get('/auth/me');
       dispatch({
         type: AUTH_ACTIONS.LOGIN_SUCCESS,
-        payload: {
-          user: response.data.user,
-          token: state.token
-        }
+        payload: { user: data.user, token: state.token }
       });
     } catch (error) {
-      console.error('Load user error:', error);
       localStorage.removeItem('token');
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
     }
-  };
+  }, [state.token]);
 
-  // Register user
-  const register = async (userData) => {
-    try {
-      dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
-      
-      const response = await axios.post('/api/auth/register', userData);
-      
-      localStorage.setItem('token', response.data.token);
-      
-      dispatch({
-        type: AUTH_ACTIONS.LOGIN_SUCCESS,
-        payload: response.data
-      });
-      
-      toast.success('Registration successful! Please check your email for verification.');
-      return { success: true };
-    } catch (error) {
-      const message = error.response?.data?.message || 'Registration failed';
-      dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: message });
-      toast.error(message);
-      return { success: false, error: message };
-    }
-  };
+  useEffect(() => {
+    if (state.token) loadUser();
+    else dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+  }, [state.token, loadUser]);
 
-  // Login user
+  /* -------------------- Auth APIs -------------------- */
   const login = async (credentials) => {
     try {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
-      
-      const response = await axios.post('/api/auth/login', credentials);
-      
-      localStorage.setItem('token', response.data.token);
-      
-      dispatch({
-        type: AUTH_ACTIONS.LOGIN_SUCCESS,
-        payload: response.data
-      });
-      
+      const { data } = await api.post('/auth/login', credentials);
+      localStorage.setItem('token', data.token);
+      dispatch({ type: AUTH_ACTIONS.LOGIN_SUCCESS, payload: data });
       toast.success('Login successful!');
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Login failed';
       dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: message });
       toast.error(message);
-      return { success: false, error: message };
+      return { success: false };
     }
   };
 
-  // Logout user
-  const logout = () => {
-    localStorage.removeItem('token');
-    dispatch({ type: AUTH_ACTIONS.LOGOUT });
-    toast.success('Logged out successfully');
-  };
-
-  // Update user profile
-  const updateProfile = async (profileData) => {
+  const register = async (userData) => {
     try {
-      const response = await axios.put('/api/auth/profile', profileData);
-      
-      dispatch({
-        type: AUTH_ACTIONS.UPDATE_USER,
-        payload: response.data.user
-      });
-      
-      toast.success('Profile updated successfully');
+      dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
+      const { data } = await api.post('/auth/register', userData);
+      localStorage.setItem('token', data.token);
+      dispatch({ type: AUTH_ACTIONS.LOGIN_SUCCESS, payload: data });
+      toast.success('Registration successful!');
       return { success: true };
     } catch (error) {
-      const message = error.response?.data?.message || 'Profile update failed';
+      const message = error.response?.data?.message || 'Registration failed';
       toast.error(message);
-      return { success: false, error: message };
+      return { success: false };
     }
   };
 
-  // Change password
-  const changePassword = async (passwordData) => {
-    try {
-      await axios.put('/api/auth/change-password', passwordData);
-      toast.success('Password changed successfully');
-      return { success: true };
-    } catch (error) {
-      const message = error.response?.data?.message || 'Password change failed';
-      toast.error(message);
-      return { success: false, error: message };
-    }
-  };
+  const clearError = () => dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
 
-  // Forgot password
-  const forgotPassword = async (email) => {
-    try {
-      await axios.post('/api/auth/forgot-password', { email });
-      toast.success('Password reset email sent');
-      return { success: true };
-    } catch (error) {
-      const message = error.response?.data?.message || 'Failed to send reset email';
-      toast.error(message);
-      return { success: false, error: message };
-    }
-  };
-
-  // Reset password
-  const resetPassword = async (token, password) => {
-    try {
-      const response = await axios.put(`/api/auth/reset-password/${token}`, { password });
-      
-      localStorage.setItem('token', response.data.token);
-      
-      dispatch({
-        type: AUTH_ACTIONS.LOGIN_SUCCESS,
-        payload: response.data
-      });
-      
-      toast.success('Password reset successful');
-      return { success: true };
-    } catch (error) {
-      const message = error.response?.data?.message || 'Password reset failed';
-      toast.error(message);
-      return { success: false, error: message };
-    }
-  };
-
-  // Verify email
-  const verifyEmail = async (token) => {
-    try {
-      await axios.get(`/api/auth/verify-email/${token}`);
-      
-      // Reload user data to get updated verification status
-      await loadUser();
-      
-      toast.success('Email verified successfully');
-      return { success: true };
-    } catch (error) {
-      const message = error.response?.data?.message || 'Email verification failed';
-      toast.error(message);
-      return { success: false, error: message };
-    }
-  };
-
-  // Clear error
-  const clearError = () => {
-    dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
-  };
-
-  // Context value
-  const value = {
-    ...state,
-    register,
-    login,
-    logout,
-    updateProfile,
-    changePassword,
-    forgotPassword,
-    resetPassword,
-    verifyEmail,
-    clearError,
-    loadUser
-  };
-
+  /* -------------------- Context Value -------------------- */
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider
+      value={{
+        ...state,
+        login,
+        register,
+        logout,
+        loadUser,
+        clearError
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Custom hook to use auth context
+/* -------------------- Custom Hook -------------------- */
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth must be used within AuthProvider');
   }
-  
   return context;
 };
 
-
 export default AuthContext;
-
-
-

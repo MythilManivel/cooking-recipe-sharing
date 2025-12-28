@@ -7,8 +7,6 @@ import React, {
 } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-
-/* -------------------- Axios Instance -------------------- */
 const api = axios.create({
   baseURL: '/api'
 });
@@ -191,3 +189,4 @@ export const useAuth = () => {
 };
 
 export default AuthContext;
+

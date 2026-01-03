@@ -1,48 +1,86 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { FaStar, FaHeart, FaClock, FaUsers } from 'react-icons/fa';
+import React from "react";
+import { Link } from "react-router-dom";
+import { FaStar, FaHeart, FaClock, FaUsers } from "react-icons/fa";
 
-const RecipeCard = ({ recipe, onLike, onFavorite }) => {
+const RecipeCard = ({ recipe = {}, onLike, onFavorite }) => {
+  const {
+    _id,
+    title = "Untitled Recipe",
+    description = "No description available",
+    images = [],
+    averageRating = 0,
+    totalRatings = 0,
+    cookingTime = 0,
+    servings = 1,
+    tags = [],
+    likes = [],
+  } = recipe;
+
+  const imageSrc = images?.length > 0 ? images[0] : "/default-recipe.jpg";
+
   return (
     <div className="recipe-card">
+      {/* Image Section */}
       <div className="recipe-image">
-        <img src={recipe.images[0] || '/default-recipe.jpg'} alt={recipe.title} />
-        <button className="favorite-btn" onClick={() => onFavorite(recipe._id)}>
+        <img src={imageSrc} alt={title} loading="lazy" />
+
+        <button
+          className="favorite-btn"
+          onClick={() => onFavorite?.(_id)}
+          aria-label="Add to favorites"
+        >
           <FaHeart />
         </button>
       </div>
-      
+
+      {/* Content Section */}
       <div className="recipe-content">
-        <h3>{recipe.title}</h3>
-        <p className="recipe-description">{recipe.description}</p>
-        
+        <h3>{title}</h3>
+        <p className="recipe-description">{description}</p>
+
+        {/* Meta Info */}
         <div className="recipe-meta">
           <span className="rating">
-            <FaStar /> {recipe.averageRating.toFixed(1)} ({recipe.totalRatings})
+            <FaStar /> {averageRating.toFixed(1)} ({totalRatings})
           </span>
+
           <span className="time">
-            <FaClock /> {recipe.cookingTime} min
+            <FaClock /> {cookingTime} min
           </span>
+
           <span className="servings">
-            <FaUsers /> {recipe.servings} servings
+            <FaUsers /> {servings} servings
           </span>
         </div>
-        
-        <div className="recipe-tags">
-          {recipe.tags.map(tag => (
-            <span key={tag} className="tag">{tag}</span>
-          ))}
-        </div>
-        
+
+        {/* Tags */}
+        {tags.length > 0 && (
+          <div className="recipe-tags">
+            {tags.map((tag, index) => (
+              <span key={`${tag}-${index}`} className="tag">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Actions */}
         <div className="recipe-actions">
-          <Link to={`/recipe/${recipe._id}`} className="view-btn">
+          <Link to={`/recipe/${_id}`} className="view-btn">
             View Recipe
           </Link>
-          <button className="like-btn" onClick={() => onLike(recipe._id)}>
-            <FaHeart /> {recipe.likes.length}
+
+          <button
+            className="like-btn"
+            onClick={() => onLike?.(_id)}
+            aria-label="Like recipe"
+          >
+            <FaHeart /> {likes.length}
           </button>
         </div>
       </div>
     </div>
   );
 };
+
+export default RecipeCard;

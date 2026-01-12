@@ -25,30 +25,23 @@ const RecipeForm = ({ onRecipeAdded, initialData, onUpdateComplete }) => {
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
-
-    // ✅ same logic for add & edit
-    formData.append(
-      "ingredients",
-      ingredients.split(",").map(i => i.trim())
-    );
-    formData.append(
-      "steps",
-      steps.split("\n").map(s => s.trim())
-    );
-
+    formData.append("ingredients", ingredients);
+    formData.append("steps", steps);
     if (image) formData.append("image", image);
 
     const config = {
       headers: { "Content-Type": "multipart/form-data" },
     };
 
-    const res = recipeId
-      ? await api.put(`/recipes/${recipeId}`, formData, config)
-      : await api.post("/recipes", formData, config);
+    const apiCall = recipeId
+      ? api.put(`/recipes/${recipeId}`, formData, config)
+      : api.post("/recipes", formData, config);
+
+    const res = await apiCall;
 
     recipeId ? onUpdateComplete(res.data) : onRecipeAdded(res.data);
 
-    // reset
+    // Reset form
     setTitle("");
     setDescription("");
     setIngredients("");
@@ -67,6 +60,7 @@ const RecipeForm = ({ onRecipeAdded, initialData, onUpdateComplete }) => {
           <label className="form-label">Recipe Title</label>
           <input
             className="form-input"
+            placeholder="Enter a delicious recipe title..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
@@ -77,6 +71,7 @@ const RecipeForm = ({ onRecipeAdded, initialData, onUpdateComplete }) => {
           <label className="form-label">Description</label>
           <textarea
             className="form-textarea"
+            placeholder="Tell us about this amazing recipe..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
@@ -86,8 +81,10 @@ const RecipeForm = ({ onRecipeAdded, initialData, onUpdateComplete }) => {
           <label className="form-label">Ingredients</label>
           <textarea
             className="form-textarea"
+            placeholder="List ingredients separated by commas"
             value={ingredients}
             onChange={(e) => setIngredients(e.target.value)}
+            style={{ minHeight: "80px" }}
           />
         </div>
 
@@ -95,8 +92,10 @@ const RecipeForm = ({ onRecipeAdded, initialData, onUpdateComplete }) => {
           <label className="form-label">Cooking Steps</label>
           <textarea
             className="form-textarea"
+            placeholder="Enter each step on a new line..."
             value={steps}
             onChange={(e) => setSteps(e.target.value)}
+            style={{ minHeight: "120px" }}
           />
         </div>
 
@@ -110,7 +109,11 @@ const RecipeForm = ({ onRecipeAdded, initialData, onUpdateComplete }) => {
           />
         </div>
 
-        <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>
+        <button
+          type="submit"
+          className="btn btn-primary"
+          style={{ width: "100%" }}
+        >
           {recipeId ? "🔄 Update Recipe" : "🍳 Add Recipe"}
         </button>
       </form>
